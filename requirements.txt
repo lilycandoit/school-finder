@@ -1,0 +1,24 @@
+# FastAPI - Modern web framework for building APIs
+fastapi==0.104.1
+
+# Uvicorn - ASGI server to run FastAPI applications
+uvicorn[standard]==0.24.0
+
+# SQLModel - Combines SQLAlchemy and Pydantic for database models
+sqlmodel==0.0.14
+
+# SQLAlchemy - ORM (Object-Relational Mapping) for database operations
+sqlalchemy==2.0.23
+
+# Greenlet - Required for SQLAlchemy async operations
+greenlet>=2.0.0
+
+# Async SQLite driver for async database operations
+aiosqlite==0.19.0
+
+# Jinja2 - Template engine for rendering HTML templates
+jinja2==3.1.2
+
+# Python-multipart - Required for form data handling
+python-multipart==0.0.6
+

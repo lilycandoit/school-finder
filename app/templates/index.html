@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Find Schools Near You - NSW School Finder{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-hand font-bold text-black mb-6 text-center">
+        Find Schools Near You
+    </h1>
+
+    <p class="text-lg text-gray-700 mb-8 text-center font-sans">
+        Enter your suburb or postcode to find nearby schools
+    </p>
+
+    {% if error %}
+    <div class="bg-red-50 border-2 border-red-500 rounded-lg p-4 mb-6">
+        <p class="text-red-800 font-sans">{{ error }}</p>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/results" class="bg-white border-2 border-black rounded-lg p-4 sm:p-6 space-y-4">
+        <div>
+            <label for="suburb" class="block text-sm font-medium text-black mb-2 font-hand">
+                Suburb (optional)
+            </label>
+            <input
+                type="text"
+                id="suburb"
+                name="suburb"
+                value="{{ suburb or '' }}"
+                class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black font-sans"
+                placeholder="e.g. Parramatta"
+                aria-label="Suburb name"
+            >
+        </div>
+
+        <div>
+            <label for="postcode" class="block text-sm font-medium text-black mb-2 font-hand">
+                Postcode (optional)
+            </label>
+            <input
+                type="text"
+                id="postcode"
+                name="postcode"
+                value="{{ postcode or '' }}"
+                class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black font-sans"
+                placeholder="e.g. 2150"
+                pattern="[0-9]{4}"
+                maxlength="4"
+                aria-label="Postcode"
+            >
+        </div>
+
+        <div>
+            <label for="radius" class="block text-sm font-medium text-black mb-2 font-hand">
+                Search Radius
+            </label>
+            <select
+                id="radius"
+                name="radius"
+                class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black font-sans"
+                aria-label="Search radius in kilometers"
+            >
+                <option value="3">3 km</option>
+                <option value="5" selected>5 km</option>
+                <option value="10">10 km</option>
+            </select>
+        </div>
+
+        <button
+            type="submit"
+            class="w-full bg-black text-white px-6 py-3 rounded-lg font-hand font-bold text-lg hover:bg-gray-800 transition-colors"
+        >
+            Find Nearby Schools
+        </button>
+    </form>
+
+    <div class="mt-8 text-center text-sm text-gray-600 font-sans">
+        <p>You need to enter at least a suburb or postcode to search.</p>
+    </div>
+</div>
+{% endblock %}

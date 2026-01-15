@@ -1,0 +1,1 @@
+"""NSW School Finder Application."""

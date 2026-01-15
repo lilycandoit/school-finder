@@ -1,0 +1,147 @@
+"""School finder routes."""
+from typing import Optional
+from fastapi import APIRouter, Request, Depends, HTTPException, Form, Query
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.utils.database import get_db
+from app.controllers.geocoding import geocode_location
+from app.controllers.school_controller import (
+    find_schools_nearby,
+    get_school_by_id,
+    get_schools_by_ids,
+    get_distinct_levels,
+)
+
+router = APIRouter()
+templates = Jinja2Templates(directory="app/templates")
+
+
+@router.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    """Home page with location input form."""
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@router.post("/results", response_class=HTMLResponse)
+async def results(
+    request: Request,
+    suburb: Optional[str] = Form(None),
+    postcode: Optional[str] = Form(None),
+    radius: float = Form(5.0),
+    level: Optional[str] = Form(None),
+    sector: Optional[str] = Form(None),
+    db: AsyncSession = Depends(get_db),
+):
+    """Results page showing schools near location."""
+    # Validate input
+    if not suburb and not postcode:
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+                "error": "Please enter a suburb or postcode.",
+            },
+        )
+
+    # Geocode location
+    location = await geocode_location(db, suburb=suburb, postcode=postcode)
+
+    if not location:
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+                "error": f"Could not find location for {suburb or ''} {postcode or ''}. Please try again.",
+                "suburb": suburb,
+                "postcode": postcode,
+            },
+        )
+
+    latitude, longitude = location
+
+    # Find schools
+    schools = await find_schools_nearby(
+        db, latitude, longitude, radius, level=level, sector=sector
+    )
+
+    # Get distinct levels for filter
+    distinct_levels = await get_distinct_levels(db)
+
+    return templates.TemplateResponse(
+        "results.html",
+        {
+            "request": request,
+            "schools": schools,
+            "suburb": suburb,
+            "postcode": postcode,
+            "radius": radius,
+            "selected_level": level,
+            "distinct_levels": distinct_levels,
+            "result_count": len(schools),
+        },
+    )
+
+
+@router.get("/school/{school_id}", response_class=HTMLResponse)
+async def school_detail(
+    request: Request,
+    school_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    """School detail page."""
+    school = await get_school_by_id(db, school_id)
+
+    if not school:
+        raise HTTPException(status_code=404, detail="School not found")
+
+    return templates.TemplateResponse(
+        "detail.html",
+        {
+            "request": request,
+            "school": school,
+        },
+    )
+
+
+@router.get("/compare", response_class=HTMLResponse)
+async def compare(
+    request: Request,
+    ids: Optional[str] = Query(None),
+    db: AsyncSession = Depends(get_db),
+):
+    """Compare up to 3 schools."""
+    if not ids:
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+                "error": "Please select schools to compare.",
+            },
+        )
+
+    # Parse school IDs
+    try:
+        school_ids = [int(id.strip()) for id in ids.split(",") if id.strip()][:3]
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid school IDs")
+
+    if not school_ids:
+        raise HTTPException(status_code=400, detail="No valid school IDs provided")
+
+    # Get schools
+    schools = await get_schools_by_ids(db, school_ids)
+
+    if len(schools) != len(school_ids):
+        raise HTTPException(
+            status_code=404, detail="One or more schools not found"
+        )
+
+    return templates.TemplateResponse(
+        "compare.html",
+        {
+            "request": request,
+            "schools": schools,
+        },
+    )

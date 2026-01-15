@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}{{ school.school_name or "School Details" }} - NSW School Finder{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <a href="javascript:history.back()" class="text-black hover:underline font-hand mb-4 inline-block">← Back</a>
+        <h1 class="text-3xl sm:text-4xl font-hand font-bold text-black mb-2">
+            {{ school.school_name or "Not available" }}
+        </h1>
+    </div>
+
+    <div class="bg-white border-2 border-black rounded-lg p-4 sm:p-6 space-y-6">
+        <!-- Basic Information -->
+        <section>
+            <h2 class="text-xl font-hand font-bold text-black mb-4">Basic Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans text-gray-700">
+                <div>
+                    <p class="font-semibold text-black">School Level:</p>
+                    <p>{{ school.level_of_schooling or "Not available" }}</p>
+                </div>
+                <div>
+                    <p class="font-semibold text-black">School Type:</p>
+                    <p>{{ school.school_subtype or "Not available" }}</p>
+                </div>
+                <div>
+                    <p class="font-semibold text-black">Selective School:</p>
+                    <p>{{ school.selective_school or "Not available" }}</p>
+                </div>
+                <div>
+                    <p class="font-semibold text-black">School Gender:</p>
+                    <p>{{ school.school_gender or "Not available" }}</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Location -->
+        <section>
+            <h2 class="text-xl font-hand font-bold text-black mb-4">Location</h2>
+            <div class="font-sans text-gray-700 space-y-2">
+                <p><strong class="text-black">Address:</strong> {{ school.street or "Not available" }}</p>
+                <p><strong class="text-black">Suburb:</strong> {{ school.town_suburb or "Not available" }}</p>
+                <p><strong class="text-black">Postcode:</strong> {{ school.postcode or "Not available" }}</p>
+            </div>
+        </section>
+
+        <!-- Contact Information -->
+        <section>
+            <h2 class="text-xl font-hand font-bold text-black mb-4">Contact Information</h2>
+            <div class="font-sans text-gray-700 space-y-2">
+                {% if school.phone %}
+                <p><strong class="text-black">Phone:</strong> {{ school.phone }}</p>
+                {% endif %}
+                {% if school.school_email %}
+                <p><strong class="text-black">Email:</strong> <a href="mailto:{{ school.school_email }}" class="text-blue-600 hover:underline">{{ school.school_email }}</a></p>
+                {% endif %}
+                {% if school.website %}
+                <p><strong class="text-black">Website:</strong> <a href="{{ school.website }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">{{ school.website }}</a></p>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Enrolment -->
+        <section>
+            <h2 class="text-xl font-hand font-bold text-black mb-4">Enrolment</h2>
+            <div class="font-sans text-gray-700 space-y-2">
+                {% if school.latest_year_enrolment_fte %}
+                <p><strong class="text-black">Enrolment (FTE):</strong> {{ "%.0f"|format(school.latest_year_enrolment_fte) }}</p>
+                {% else %}
+                <p><strong class="text-black">Enrolment:</strong> Not available</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Demographics -->
+        <section>
+            <h2 class="text-xl font-hand font-bold text-black mb-4">Student Background</h2>
+            <div class="font-sans text-gray-700 space-y-2">
+                {% if school.indigenous_pct %}
+                    {% if school.indigenous_pct == "np" %}
+                    <p><strong class="text-black">Indigenous Students:</strong> Not published (small numbers)</p>
+                    {% else %}
+                    <p><strong class="text-black">Indigenous Students:</strong> {{ school.indigenous_pct }}%</p>
+                    {% endif %}
+                {% else %}
+                <p><strong class="text-black">Indigenous Students:</strong> Not available</p>
+                {% endif %}
+
+                {% if school.lbote_pct %}
+                    {% if school.lbote_pct == "np" %}
+                    <p><strong class="text-black">Language Background Other Than English:</strong> Not published (small numbers)</p>
+                    {% else %}
+                    <p><strong class="text-black">Language Background Other Than English:</strong> {{ school.lbote_pct }}%</p>
+                    {% endif %}
+                {% else %}
+                <p><strong class="text-black">Language Background Other Than English:</strong> Not available</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- ICSEA -->
+        {% if school.icsea_value %}
+        <section class="border-t-2 border-gray-300 pt-6">
+            <h2 class="text-xl font-hand font-bold text-black mb-4">ICSEA Value</h2>
+            <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 mb-4">
+                <p class="font-sans text-gray-800 mb-2">
+                    <strong class="text-black">ICSEA Value:</strong> {{ school.icsea_value }}
+                </p>
+                <p class="font-sans text-sm text-gray-700 italic">
+                    ICSEA shows the general socio-educational background of students at a school. It does not measure school quality or teaching performance.
+                </p>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Additional Information -->
+        <section>
+            <h2 class="text-xl font-hand font-bold text-black mb-4">Additional Information</h2>
+            <div class="font-sans text-gray-700 space-y-2 text-sm">
+                {% if school.school_specialty_type %}
+                <p><strong class="text-black">Specialty Type:</strong> {{ school.school_specialty_type }}</p>
+                {% endif %}
+                {% if school.preschool_ind == "Y" %}
+                <p><strong class="text-black">Preschool:</strong> Yes</p>
+                {% endif %}
+                {% if school.support_classes %}
+                <p><strong class="text-black">Support Classes:</strong> {{ school.support_classes }}</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Schools Near You - NSW School Finder{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-6">
+        <a href="/" class="text-black hover:underline font-hand mb-4 inline-block">← Back to search</a>
+        <h1 class="text-3xl sm:text-4xl font-hand font-bold text-black mb-2">
+            Schools Near You
+        </h1>
+        <p class="text-gray-700 font-sans">
+            {% if suburb and postcode %}
+                Found {{ result_count }} school{{ 's' if result_count != 1 else '' }} within {{ radius }}km of {{ suburb }}, {{ postcode }}
+            {% elif suburb %}
+                Found {{ result_count }} school{{ 's' if result_count != 1 else '' }} within {{ radius }}km of {{ suburb }}
+            {% elif postcode %}
+                Found {{ result_count }} school{{ 's' if result_count != 1 else '' }} within {{ radius }}km of postcode {{ postcode }}
+            {% endif %}
+        </p>
+    </div>
+
+    {% if not schools %}
+    <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-8 text-center">
+        <p class="text-lg text-gray-700 font-sans mb-4">No schools found in this area.</p>
+        <a href="/" class="text-black hover:underline font-hand">Try a different location</a>
+    </div>
+    {% else %}
+    <!-- Filters -->
+    <div class="bg-white border-2 border-black rounded-lg p-4 mb-6">
+        <form method="POST" action="/results" class="space-y-4 sm:space-y-0 sm:flex sm:items-end sm:gap-4">
+            <input type="hidden" name="suburb" value="{{ suburb or '' }}">
+            <input type="hidden" name="postcode" value="{{ postcode or '' }}">
+            <input type="hidden" name="radius" value="{{ radius }}">
+
+            <div class="flex-1">
+                <label for="level" class="block text-sm font-medium text-black mb-2 font-hand">
+                    School Level
+                </label>
+                <select
+                    id="level"
+                    name="level"
+                    class="w-full px-4 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black font-sans"
+                >
+                    <option value="">All Levels</option>
+                    {% for level_option in distinct_levels %}
+                    <option value="{{ level_option }}" {% if selected_level == level_option %}selected{% endif %}>
+                        {{ level_option }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button
+                type="submit"
+                class="w-full sm:w-auto bg-black text-white px-6 py-2 rounded-lg font-hand font-bold hover:bg-gray-800 transition-colors"
+            >
+                Filter
+            </button>
+        </form>
+    </div>
+
+    <!-- Comparison form -->
+    <form id="compareForm" method="GET" action="/compare">
+        <div class="mb-4 flex items-center justify-between">
+            <p class="text-sm text-gray-700 font-sans">Select up to 3 schools to compare</p>
+            <button
+                type="submit"
+                id="compareBtn"
+                class="bg-black text-white px-4 py-2 rounded-lg font-hand font-bold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled
+            >
+                Compare Selected
+            </button>
+        </div>
+
+        <!-- School Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for school in schools %}
+            <div class="bg-white border-2 border-black rounded-lg p-4 sm:p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-start justify-between mb-3">
+                    <input
+                        type="checkbox"
+                        name="ids"
+                        value="{{ school.id }}"
+                        class="compare-checkbox mt-1 w-5 h-5 border-2 border-black rounded focus:ring-2 focus:ring-black"
+                        aria-label="Select {{ school.school_name }} for comparison"
+                    >
+                    <span class="text-sm font-sans text-gray-600">{{ school.distance }} km</span>
+                </div>
+
+                <h3 class="text-lg font-hand font-bold text-black mb-2">
+                    {{ school.school_name or "Not available" }}
+                </h3>
+
+                <div class="space-y-1 mb-4 text-sm font-sans text-gray-700">
+                    <p><strong>Level:</strong> {{ school.level_of_schooling or "Not available" }}</p>
+                    <p><strong>Location:</strong> {{ school.town_suburb or "Not available" }}{% if school.postcode %}, {{ school.postcode }}{% endif %}</p>
+                    {% if school.latest_year_enrolment_fte %}
+                    <p><strong>Enrolment:</strong> {{ "%.0f"|format(school.latest_year_enrolment_fte) }}</p>
+                    {% else %}
+                    <p><strong>Enrolment:</strong> Not available</p>
+                    {% endif %}
+                </div>
+
+                <a
+                    href="/school/{{ school.id }}"
+                    class="block w-full bg-black text-white text-center px-4 py-2 rounded-lg font-hand font-bold hover:bg-gray-800 transition-colors"
+                >
+                    View Details
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </form>
+    {% endif %}
+</div>
+
+<script>
+// Limit checkboxes to 3
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.compare-checkbox');
+    const compareBtn = document.getElementById('compareBtn');
+    const compareForm = document.getElementById('compareForm');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checked = document.querySelectorAll('.compare-checkbox:checked');
+            if (checked.length > 3) {
+                this.checked = false;
+                alert('You can only compare up to 3 schools');
+                return;
+            }
+
+            compareBtn.disabled = checked.length === 0;
+        });
+    });
+
+    compareForm.addEventListener('submit', function(e) {
+        const checked = document.querySelectorAll('.compare-checkbox:checked');
+        if (checked.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one school to compare');
+            return;
+        }
+
+        // Build query string
+        const ids = Array.from(checked).map(cb => cb.value).join(',');
+        this.action = `/compare?ids=${ids}`;
+    });
+});
+</script>
+{% endblock %}
