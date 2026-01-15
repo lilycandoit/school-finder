@@ -32,7 +32,11 @@ async def results(
     postcode: Optional[str] = Form(None),
     radius: float = Form(5.0),
     level: Optional[str] = Form(None),
-    sector: Optional[str] = Form(None),
+    has_preschool: Optional[str] = Form(None),
+    has_intensive_english: Optional[str] = Form(None),
+    has_opportunity_class: Optional[str] = Form(None),
+    not_selective: Optional[str] = Form(None),
+    has_distance_education: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db),
 ):
     """Results page showing schools near location."""
@@ -62,9 +66,19 @@ async def results(
 
     latitude, longitude = location
 
+    # Build filters dict
+    filters = {
+        "level": level if level else None,
+        "has_preschool": has_preschool == "Y",
+        "has_intensive_english": has_intensive_english == "Y",
+        "has_opportunity_class": has_opportunity_class == "Y",
+        "not_selective": not_selective == "Y",
+        "has_distance_education": has_distance_education == "Y",
+    }
+
     # Find schools
     schools = await find_schools_nearby(
-        db, latitude, longitude, radius, level=level, sector=sector
+        db, latitude, longitude, radius, filters=filters
     )
 
     # Get distinct levels for filter
@@ -81,6 +95,7 @@ async def results(
             "selected_level": level,
             "distinct_levels": distinct_levels,
             "result_count": len(schools),
+            "filters": filters,
         },
     )
 

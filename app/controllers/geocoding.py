@@ -125,6 +125,60 @@ async def compute_suburb_median(
     return (median_lat, median_lon)
 
 
+async def compute_postcode_median(
+    db: AsyncSession, postcode: str
+) -> Optional[Tuple[float, float]]:
+    """
+    Compute median latitude/longitude from schools in postcode.
+
+    Args:
+        db: Database session
+        postcode: Postcode string
+
+    Returns:
+        Tuple of (median_latitude, median_longitude) or None if no schools found
+    """
+    postcode_clean = str(postcode).strip()
+
+    query = sqlmodel_select(
+        School.latitude, School.longitude
+    ).where(
+        School.postcode == postcode_clean,
+        School.latitude.isnot(None),
+        School.longitude.isnot(None)
+    )
+
+    result = await db.execute(query)
+    schools = result.all()
+
+    if not schools:
+        return None
+
+    # Extract valid coordinates
+    coords = [
+        (float(lat), float(lon))
+        for lat, lon in schools
+        if lat is not None and lon is not None
+    ]
+
+    if not coords:
+        return None
+
+    # Calculate median
+    lats = sorted([lat for lat, _ in coords])
+    lons = sorted([lon for _, lon in coords])
+
+    mid = len(lats) // 2
+    if len(lats) % 2 == 0:
+        median_lat = (lats[mid - 1] + lats[mid]) / 2
+        median_lon = (lons[mid - 1] + lons[mid]) / 2
+    else:
+        median_lat = lats[mid]
+        median_lon = lons[mid]
+
+    return (median_lat, median_lon)
+
+
 async def geocode_location(
     db: AsyncSession, suburb: Optional[str] = None, postcode: Optional[str] = None
 ) -> Optional[Tuple[float, float]]:
@@ -134,7 +188,7 @@ async def geocode_location(
     Strategy:
     1. If postcode provided, try postcode lookup first
     2. If suburb provided, try suburb lookup in postcode table
-    3. Fallback: compute median from schools in suburb
+    3. Fallback: compute median from schools in suburb or postcode
 
     Args:
         db: Database session
@@ -158,6 +212,12 @@ async def geocode_location(
 
         # Fallback: median of schools in suburb
         result = await compute_suburb_median(db, suburb, postcode)
+        if result:
+            return result
+
+    # Final fallback: if only postcode provided, compute median from schools in that postcode
+    if postcode and not suburb:
+        result = await compute_postcode_median(db, postcode)
         if result:
             return result
 

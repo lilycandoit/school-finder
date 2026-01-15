@@ -12,25 +12,32 @@ async def find_schools_nearby(
     latitude: float,
     longitude: float,
     radius_km: float,
-    level: Optional[str] = None,
-    sector: Optional[str] = None,
+    filters: Optional[dict] = None,
     limit: int = 50,
 ) -> List[dict]:
     """
-    Find schools within radius, optionally filtered by level and sector.
+    Find schools within radius, optionally filtered by various criteria.
 
     Args:
         db: Database session
         latitude: Center latitude
         longitude: Center longitude
         radius_km: Search radius in kilometers
-        level: Optional school level filter (e.g., "Primary School", "Secondary School")
-        sector: Optional sector filter (not in data, but kept for API consistency)
+        filters: Optional dict with filter criteria:
+            - level: School level (e.g., "Primary School")
+            - has_preschool: Filter for schools with preschool
+            - has_intensive_english: Filter for schools with intensive English
+            - has_opportunity_class: Filter for schools with opportunity class
+            - not_selective: Filter for non-selective schools
+            - has_distance_education: Filter for schools with distance education
         limit: Maximum number of results
 
     Returns:
         List of school dictionaries with distance calculated
     """
+    if filters is None:
+        filters = {}
+
     # Build base query
     query = select(School).where(
         School.latitude.isnot(None),
@@ -38,11 +45,27 @@ async def find_schools_nearby(
     )
 
     # Apply level filter if provided
-    if level:
-        query = query.where(School.level_of_schooling == level)
+    if filters.get("level"):
+        query = query.where(School.level_of_schooling == filters["level"])
 
-    # Note: Sector filter not applicable as all schools in dataset are public
-    # Keeping parameter for API consistency but not filtering
+    # Apply program/support filters
+    if filters.get("has_preschool"):
+        query = query.where(School.preschool_ind == "Y")
+
+    if filters.get("has_intensive_english"):
+        query = query.where(School.intensive_english_centre == "Y")
+
+    if filters.get("has_opportunity_class"):
+        query = query.where(School.opportunity_class == "Y")
+
+    if filters.get("not_selective"):
+        query = query.where(
+            (School.selective_school == "Not Selective") |
+            (School.selective_school.is_(None))
+        )
+
+    if filters.get("has_distance_education"):
+        query = query.where(School.distance_education == "Y")
 
     # Execute query
     result = await db.execute(query)
@@ -81,6 +104,11 @@ async def find_schools_nearby(
                 "latitude": school.latitude,
                 "longitude": school.longitude,
                 "distance": round(distance, 2),
+                # Add filter-relevant fields for display
+                "preschool_ind": school.preschool_ind,
+                "intensive_english_centre": school.intensive_english_centre,
+                "opportunity_class": school.opportunity_class,
+                "distance_education": school.distance_education,
             }
             schools_with_distance.append(school_dict)
 
