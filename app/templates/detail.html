@@ -30,7 +30,17 @@
                 </div>
                 <div>
                     <p class="font-semibold text-black">School Gender:</p>
-                    <p>{{ school.school_gender or "Not available" }}</p>
+                    <p>
+                        {% if school.school_gender == "Coed" %}
+                            Boys & Girls
+                        {% elif school.school_gender == "Boys" %}
+                            Boys Only
+                        {% elif school.school_gender == "Girls" %}
+                            Girls Only
+                        {% else %}
+                            {{ school.school_gender or "Not available" }}
+                        {% endif %}
+                    </p>
                 </div>
             </div>
         </section>
@@ -50,7 +60,7 @@
             <h2 class="text-xl font-hand font-bold text-black mb-4">Contact Information</h2>
             <div class="font-sans text-gray-700 space-y-2">
                 {% if school.phone %}
-                <p><strong class="text-black">Phone:</strong> {{ school.phone }}</p>
+                <p><strong class="text-black">Phone:</strong> <a href="tel:{{ school.phone }}" class="text-blue-600 hover:underline">{{ school.phone }}</a></p>
                 {% endif %}
                 {% if school.school_email %}
                 <p><strong class="text-black">Email:</strong> <a href="mailto:{{ school.school_email }}" class="text-blue-600 hover:underline">{{ school.school_email }}</a></p>
@@ -89,12 +99,12 @@
 
                 {% if school.lbote_pct %}
                     {% if school.lbote_pct == "np" %}
-                    <p><strong class="text-black">Language Background Other Than English:</strong> Not published (small numbers)</p>
+                    <p><strong class="text-black">Multi-lingual Background:</strong> Data not available</p>
                     {% else %}
-                    <p><strong class="text-black">Language Background Other Than English:</strong> {{ school.lbote_pct }}%</p>
+                    <p><strong class="text-black">Multi-lingual Background:</strong> {{ school.lbote_pct }}% of students</p>
                     {% endif %}
                 {% else %}
-                <p><strong class="text-black">Language Background Other Than English:</strong> Not available</p>
+                <p><strong class="text-black">Multi-lingual Background:</strong> Data not available</p>
                 {% endif %}
             </div>
         </section>
@@ -114,13 +124,34 @@
         </section>
         {% endif %}
 
+        <!-- Special Features -->
+        {% if school.intensive_english_centre == "Y" or school.opportunity_class == "Y" or school.school_specialty_type %}
+        <section>
+            <h2 class="text-xl font-hand font-bold text-black mb-4">Special Features</h2>
+            <div class="flex flex-wrap gap-2 mb-4">
+                {% if school.intensive_english_centre == "Y" %}
+                <span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded">English Language Support Centre</span>
+                {% endif %}
+                {% if school.opportunity_class == "Y" %}
+                <span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded">Advanced Classes (OC)</span>
+                {% endif %}
+                {% if school.school_specialty_type %}
+                <span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded">
+                    {% if school.school_specialty_type.lower() == "comprehensive" %}
+                        Comprehensive (standard curriculum)
+                    {% else %}
+                        {{ school.school_specialty_type }}
+                    {% endif %}
+                </span>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
+
         <!-- Additional Information -->
         <section>
             <h2 class="text-xl font-hand font-bold text-black mb-4">Additional Information</h2>
             <div class="font-sans text-gray-700 space-y-2 text-sm">
-                {% if school.school_specialty_type %}
-                <p><strong class="text-black">Specialty Type:</strong> {{ school.school_specialty_type }}</p>
-                {% endif %}
                 {% if school.preschool_ind == "Y" %}
                 <p><strong class="text-black">Preschool:</strong> Yes</p>
                 {% endif %}

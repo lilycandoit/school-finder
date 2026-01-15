@@ -21,9 +21,9 @@
         <table class="w-full border-collapse font-sans">
             <thead>
                 <tr class="border-b-2 border-black">
-                    <th class="text-left p-2 font-hand font-bold text-black">School Name</th>
+                    <th class="text-left p-2 font-hand font-bold text-black"></th>
                     {% for school in schools %}
-                    <th class="text-left p-2 font-hand font-bold text-black">{{ school.school_name or "Not available" }}</th>
+                    <th class="text-left p-2 font-hand font-bold text-black">{{ school.school_name }}</th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -31,29 +31,15 @@
                 <tr class="border-b border-gray-300">
                     <td class="p-2 font-semibold text-black">Level</td>
                     {% for school in schools %}
-                    <td class="p-2 text-gray-700">{{ school.level_of_schooling or "Not available" }}</td>
+                    <td class="p-2 text-gray-700">{{ school.level_of_schooling }}</td>
                     {% endfor %}
                 </tr>
                 <tr class="border-b border-gray-300">
-                    <td class="p-2 font-semibold text-black">Location</td>
+                    <td class="p-2 font-semibold text-black">Distance</td>
                     {% for school in schools %}
                     <td class="p-2 text-gray-700">
-                        {{ school.town_suburb or "Not available" }}{% if school.postcode %}, {{ school.postcode }}{% endif %}
-                    </td>
-                    {% endfor %}
-                </tr>
-                <tr class="border-b border-gray-300">
-                    <td class="p-2 font-semibold text-black">Address</td>
-                    {% for school in schools %}
-                    <td class="p-2 text-gray-700">{{ school.street or "Not available" }}</td>
-                    {% endfor %}
-                </tr>
-                <tr class="border-b border-gray-300">
-                    <td class="p-2 font-semibold text-black">Enrolment</td>
-                    {% for school in schools %}
-                    <td class="p-2 text-gray-700">
-                        {% if school.latest_year_enrolment_fte %}
-                            {{ "%.0f"|format(school.latest_year_enrolment_fte) }}
+                        {% if school.distance is not none %}
+                            {{ school.distance }} km away
                         {% else %}
                             Not available
                         {% endif %}
@@ -61,21 +47,60 @@
                     {% endfor %}
                 </tr>
                 <tr class="border-b border-gray-300">
-                    <td class="p-2 font-semibold text-black">School Type</td>
+                    <td class="p-2 font-semibold text-black">Location</td>
                     {% for school in schools %}
-                    <td class="p-2 text-gray-700">{{ school.school_subtype or "Not available" }}</td>
+                    <td class="p-2 text-gray-700">
+                        {{ school.town_suburb }}{% if school.postcode %}, {{ school.postcode }}{% endif %}
+                    </td>
                     {% endfor %}
                 </tr>
                 <tr class="border-b border-gray-300">
-                    <td class="p-2 font-semibold text-black">Selective</td>
+                    <td class="p-2 font-semibold text-black">Address</td>
                     {% for school in schools %}
-                    <td class="p-2 text-gray-700">{{ school.selective_school or "Not available" }}</td>
+                    <td class="p-2 text-gray-700">{{ school.street }}</td>
                     {% endfor %}
                 </tr>
                 <tr class="border-b border-gray-300">
                     <td class="p-2 font-semibold text-black">Gender</td>
                     {% for school in schools %}
-                    <td class="p-2 text-gray-700">{{ school.school_gender or "Not available" }}</td>
+                    <td class="p-2 text-gray-700">{{ school.gender }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-300">
+                    <td class="p-2 font-semibold text-black">School Size</td>
+                    {% for school in schools %}
+                    <td class="p-2 text-gray-700">
+                        {{ school.school_size }}
+                        {% if school.enrolment_raw %}
+                        <span class="text-xs text-gray-500">({{ "%.0f"|format(school.enrolment_raw) }} students)</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-300">
+                    <td class="p-2 font-semibold text-black">Community</td>
+                    {% for school in schools %}
+                    <td class="p-2 text-gray-700">{{ school.community }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-300">
+                    <td class="p-2 font-semibold text-black">Special Features</td>
+                    {% for school in schools %}
+                    <td class="p-2 text-gray-700">
+                        {% if school.special_features %}
+                            {% for feature in school.special_features %}
+                            <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mb-1 mr-1">{{ feature }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-gray-500">None listed</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-300">
+                    <td class="p-2 font-semibold text-black">Selective</td>
+                    {% for school in schools %}
+                    <td class="p-2 text-gray-700">{{ school.selective_school }}</td>
                     {% endfor %}
                 </tr>
                 {% if schools|selectattr("icsea_value")|list|length > 0 %}
@@ -104,7 +129,7 @@
                     {% for school in schools %}
                     <td class="p-2 text-gray-700">
                         {% if school.phone %}
-                            <p class="text-sm">Phone: {{ school.phone }}</p>
+                            <p class="text-sm">Phone: <a href="tel:{{ school.phone }}" class="text-blue-600 hover:underline">{{ school.phone }}</a></p>
                         {% endif %}
                         {% if school.school_email %}
                             <p class="text-sm">Email: <a href="mailto:{{ school.school_email }}" class="text-blue-600 hover:underline">{{ school.school_email }}</a></p>

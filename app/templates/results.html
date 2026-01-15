@@ -83,6 +83,7 @@
                         type="checkbox"
                         name="ids"
                         value="{{ school.id }}"
+                        data-distance="{{ school.distance }}"
                         class="compare-checkbox mt-1 w-5 h-5 border-2 border-black rounded focus:ring-2 focus:ring-black"
                         aria-label="Select {{ school.school_name }} for comparison"
                     >
@@ -137,16 +138,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     compareForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
         const checked = document.querySelectorAll('.compare-checkbox:checked');
         if (checked.length === 0) {
-            e.preventDefault();
             alert('Please select at least one school to compare');
             return;
         }
 
-        // Build query string
+        // Navigate directly to compare page with IDs and distances
         const ids = Array.from(checked).map(cb => cb.value).join(',');
-        this.action = `/compare?ids=${ids}`;
+        const distances = Array.from(checked).map(cb => cb.dataset.distance).join(',');
+        window.location.href = `/compare?ids=${ids}&distances=${distances}`;
     });
 });
 </script>

@@ -13,6 +13,7 @@ from app.controllers.school_controller import (
     get_schools_by_ids,
     get_distinct_levels,
 )
+from app.utils.school_display import transform_schools_for_comparison
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -109,6 +110,7 @@ async def school_detail(
 async def compare(
     request: Request,
     ids: Optional[str] = Query(None),
+    distances: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
     """Compare up to 3 schools."""
@@ -130,6 +132,14 @@ async def compare(
     if not school_ids:
         raise HTTPException(status_code=400, detail="No valid school IDs provided")
 
+    # Parse distances (optional)
+    distance_list = []
+    if distances:
+        try:
+            distance_list = [float(d.strip()) for d in distances.split(",") if d.strip()][:3]
+        except ValueError:
+            distance_list = []
+
     # Get schools
     schools = await get_schools_by_ids(db, school_ids)
 
@@ -138,10 +148,20 @@ async def compare(
             status_code=404, detail="One or more schools not found"
         )
 
+    # Transform schools for user-friendly display
+    display_schools = transform_schools_for_comparison(schools)
+
+    # Add distances to display schools (matching by order)
+    for i, school in enumerate(display_schools):
+        if i < len(distance_list):
+            school["distance"] = distance_list[i]
+        else:
+            school["distance"] = None
+
     return templates.TemplateResponse(
         "compare.html",
         {
             "request": request,
-            "schools": schools,
+            "schools": display_schools,
         },
     )
