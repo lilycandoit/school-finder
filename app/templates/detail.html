@@ -25,10 +25,6 @@
                     <p>{{ school.school_subtype or "Not available" }}</p>
                 </div>
                 <div>
-                    <p class="font-semibold text-black">Selective School:</p>
-                    <p>{{ school.selective_school or "Not available" }}</p>
-                </div>
-                <div>
                     <p class="font-semibold text-black">School Gender:</p>
                     <p>
                         {% if school.school_gender == "Coed" %}
@@ -39,6 +35,22 @@
                             Girls Only
                         {% else %}
                             {{ school.school_gender or "Not available" }}
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="font-semibold text-black">School Size:</p>
+                    <p>
+                        {% if school.latest_year_enrolment_fte %}
+                            {% if school.latest_year_enrolment_fte < 300 %}
+                                Small School ({{ "%.0f"|format(school.latest_year_enrolment_fte) }} students)
+                            {% elif school.latest_year_enrolment_fte <= 800 %}
+                                Medium School ({{ "%.0f"|format(school.latest_year_enrolment_fte) }} students)
+                            {% else %}
+                                Large School ({{ "%.0f"|format(school.latest_year_enrolment_fte) }} students)
+                            {% endif %}
+                        {% else %}
+                            Not available
                         {% endif %}
                     </p>
                 </div>
@@ -71,19 +83,7 @@
             </div>
         </section>
 
-        <!-- Enrolment -->
-        <section>
-            <h2 class="text-xl font-hand font-bold text-black mb-4">Enrolment</h2>
-            <div class="font-sans text-gray-700 space-y-2">
-                {% if school.latest_year_enrolment_fte %}
-                <p><strong class="text-black">Enrolment (FTE):</strong> {{ "%.0f"|format(school.latest_year_enrolment_fte) }}</p>
-                {% else %}
-                <p><strong class="text-black">Enrolment:</strong> Not available</p>
-                {% endif %}
-            </div>
-        </section>
-
-        <!-- Demographics -->
+        <!-- Student Background -->
         <section>
             <h2 class="text-xl font-hand font-bold text-black mb-4">Student Background</h2>
             <div class="font-sans text-gray-700 space-y-2">
@@ -109,11 +109,125 @@
             </div>
         </section>
 
+        <!-- Learning Options & Support -->
+        <section>
+            <h2 class="text-xl font-hand font-bold text-black mb-4">Learning Options & Support</h2>
+            <div class="space-y-3 font-sans">
+                <!-- Preschool -->
+                <div class="flex items-start gap-3 p-3 rounded-lg {% if school.preschool_ind == 'Y' %}bg-green-50 border border-green-200{% else %}bg-gray-50 border border-gray-200{% endif %}">
+                    <div class="flex-shrink-0 mt-0.5">
+                        {% if school.preschool_ind == "Y" %}
+                        <span class="text-green-600 text-lg">&#10003;</span>
+                        {% else %}
+                        <span class="text-gray-400 text-lg">&#10005;</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="font-semibold text-black">Preschool available on site</p>
+                        <p class="text-sm text-gray-600">This school has a preschool located on the same campus.</p>
+                    </div>
+                </div>
+
+                <!-- Intensive English -->
+                <div class="flex items-start gap-3 p-3 rounded-lg {% if school.intensive_english_centre == 'Y' %}bg-green-50 border border-green-200{% else %}bg-gray-50 border border-gray-200{% endif %}">
+                    <div class="flex-shrink-0 mt-0.5">
+                        {% if school.intensive_english_centre == "Y" %}
+                        <span class="text-green-600 text-lg">&#10003;</span>
+                        {% else %}
+                        <span class="text-gray-400 text-lg">&#10005;</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="font-semibold text-black">English language support for new students</p>
+                        <p class="text-sm text-gray-600">Provides intensive English support for students who are learning English as an additional language.</p>
+                    </div>
+                </div>
+
+                <!-- Opportunity Class -->
+                <div class="flex items-start gap-3 p-3 rounded-lg {% if school.opportunity_class == 'Y' %}bg-green-50 border border-green-200{% else %}bg-gray-50 border border-gray-200{% endif %}">
+                    <div class="flex-shrink-0 mt-0.5">
+                        {% if school.opportunity_class == "Y" %}
+                        <span class="text-green-600 text-lg">&#10003;</span>
+                        {% else %}
+                        <span class="text-gray-400 text-lg">&#10005;</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="font-semibold text-black">Opportunity class available</p>
+                        <p class="text-sm text-gray-600">Offers academically advanced classes for eligible primary students.</p>
+                    </div>
+                </div>
+
+                <!-- Selective School -->
+                <div class="flex items-start gap-3 p-3 rounded-lg {% if school.selective_school and school.selective_school != 'Not Selective' %}bg-green-50 border border-green-200{% else %}bg-gray-50 border border-gray-200{% endif %}">
+                    <div class="flex-shrink-0 mt-0.5">
+                        {% if school.selective_school and school.selective_school != "Not Selective" %}
+                        <span class="text-green-600 text-lg">&#10003;</span>
+                        {% else %}
+                        <span class="text-gray-400 text-lg">&#10005;</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="font-semibold text-black">Selective school</p>
+                        <p class="text-sm text-gray-600">Entry is based on academic selection, usually through an exam.</p>
+                        {% if school.selective_school and school.selective_school != "Not Selective" %}
+                        <p class="text-sm text-blue-600 mt-1">Type: {{ school.selective_school }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Distance Education -->
+                <div class="flex items-start gap-3 p-3 rounded-lg {% if school.distance_education == 'Y' %}bg-green-50 border border-green-200{% else %}bg-gray-50 border border-gray-200{% endif %}">
+                    <div class="flex-shrink-0 mt-0.5">
+                        {% if school.distance_education == "Y" %}
+                        <span class="text-green-600 text-lg">&#10003;</span>
+                        {% else %}
+                        <span class="text-gray-400 text-lg">&#10005;</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="font-semibold text-black">Distance education option</p>
+                        <p class="text-sm text-gray-600">Offers learning programs where students study remotely rather than attending in person.</p>
+                    </div>
+                </div>
+
+                <!-- Support Classes -->
+                {% if school.support_classes %}
+                <div class="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+                    <div class="flex-shrink-0 mt-0.5">
+                        <span class="text-green-600 text-lg">&#10003;</span>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-black">Support classes available</p>
+                        <p class="text-sm text-gray-600">Provides additional support for students with specific learning needs.</p>
+                        <p class="text-sm text-blue-600 mt-1">Types: {{ school.support_classes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Learning Programs & Features -->
+        {% if school.school_specialty_type %}
+        <section>
+            <h2 class="text-xl font-hand font-bold text-black mb-4">Learning Programs & Features</h2>
+            <div class="flex flex-wrap gap-2">
+                <span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded">
+                    {% if school.school_specialty_type.lower() == "comprehensive" %}
+                        Comprehensive (standard curriculum)
+                    {% else %}
+                        {{ school.school_specialty_type }}
+                    {% endif %}
+                </span>
+            </div>
+        </section>
+        {% endif %}
+
         <!-- ICSEA -->
         {% if school.icsea_value %}
         <section class="border-t-2 border-gray-300 pt-6">
             <h2 class="text-xl font-hand font-bold text-black mb-4">ICSEA Value</h2>
-            <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 mb-4">
+            <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-4">
                 <p class="font-sans text-gray-800 mb-2">
                     <strong class="text-black">ICSEA Value:</strong> {{ school.icsea_value }}
                 </p>
@@ -123,43 +237,6 @@
             </div>
         </section>
         {% endif %}
-
-        <!-- Special Features -->
-        {% if school.intensive_english_centre == "Y" or school.opportunity_class == "Y" or school.school_specialty_type %}
-        <section>
-            <h2 class="text-xl font-hand font-bold text-black mb-4">Special Features</h2>
-            <div class="flex flex-wrap gap-2 mb-4">
-                {% if school.intensive_english_centre == "Y" %}
-                <span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded">English Language Support Centre</span>
-                {% endif %}
-                {% if school.opportunity_class == "Y" %}
-                <span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded">Advanced Classes (OC)</span>
-                {% endif %}
-                {% if school.school_specialty_type %}
-                <span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded">
-                    {% if school.school_specialty_type.lower() == "comprehensive" %}
-                        Comprehensive (standard curriculum)
-                    {% else %}
-                        {{ school.school_specialty_type }}
-                    {% endif %}
-                </span>
-                {% endif %}
-            </div>
-        </section>
-        {% endif %}
-
-        <!-- Additional Information -->
-        <section>
-            <h2 class="text-xl font-hand font-bold text-black mb-4">Additional Information</h2>
-            <div class="font-sans text-gray-700 space-y-2 text-sm">
-                {% if school.preschool_ind == "Y" %}
-                <p><strong class="text-black">Preschool:</strong> Yes</p>
-                {% endif %}
-                {% if school.support_classes %}
-                <p><strong class="text-black">Support Classes:</strong> {{ school.support_classes }}</p>
-                {% endif %}
-            </div>
-        </section>
     </div>
 </div>
 {% endblock %}
