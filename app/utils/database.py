@@ -7,11 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlmodel import SQLModel
 
 # Determine database path
-if os.path.exists("/data"):
-    # Production on Fly.io - use volume
+if os.path.exists("/opt/school-finder/data"):
+    # Production on Oracle Cloud
+    DB_PATH = Path("/opt/school-finder/data/school_finder.db")
+elif os.path.exists("/data"):
+    # Production on Fly.io or Docker
     DB_PATH = Path("/data/school_finder.db")
 else:
-    # Development - use local file
+    # Development
     DB_PATH = Path("./school_finder.db")
 
 DB_PATH.parent.mkdir(parents=True, exist_ok=True)
