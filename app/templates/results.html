@@ -21,9 +21,9 @@
     </div>
 
     {% if not schools %}
-    <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-8 text-center">
+    <div class="bg-gray-50 border-2 border-black rounded-lg p-8 text-center">
         <p class="text-lg text-gray-700 font-sans mb-4">No schools found matching your criteria.</p>
-        <a href="/" class="inline-block bg-black text-white px-6 py-2 rounded-lg font-hand font-bold hover:bg-gray-800 transition-colors">Modify Search</a>
+        <a href="/" class="inline-block bg-black text-white px-6 py-3 rounded-lg font-hand font-bold hover:bg-gray-800 transition-colors">Modify Search</a>
     </div>
     {% else %}
     <!-- Quick Filter -->
@@ -52,7 +52,7 @@
                 </select>
             </form>
 
-            <a href="/" class="text-sm text-blue-600 hover:underline font-sans whitespace-nowrap">
+            <a href="/" class="text-sm text-black hover:underline font-sans whitespace-nowrap">
                 ← Modify search options
             </a>
         </div>
@@ -60,22 +60,22 @@
         <!-- Show active filters as badges -->
         {% if filters and (filters.has_preschool or filters.has_intensive_english or filters.has_opportunity_class or filters.not_selective or filters.has_distance_education) %}
         <div class="mt-3 pt-3 border-t border-gray-200">
-            <p class="text-xs text-gray-500 font-sans mb-2">Active filters:</p>
+            <p class="text-xs text-gray-600 font-sans mb-2">Active filters:</p>
             <div class="flex flex-wrap gap-2">
                 {% if filters.has_preschool %}
-                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Preschool on site</span>
+                <span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">Preschool on site</span>
                 {% endif %}
                 {% if filters.has_intensive_english %}
-                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">English language support</span>
+                <span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">English language support</span>
                 {% endif %}
                 {% if filters.has_opportunity_class %}
-                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Opportunity class</span>
+                <span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">Opportunity class</span>
                 {% endif %}
                 {% if filters.not_selective %}
-                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Not selective</span>
+                <span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">Not selective</span>
                 {% endif %}
                 {% if filters.has_distance_education %}
-                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Distance education</span>
+                <span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">Distance education</span>
                 {% endif %}
             </div>
         </div>
@@ -118,7 +118,7 @@
 
                 <div class="space-y-1 mb-4 text-sm font-sans text-gray-700">
                     <p><strong>Level:</strong> {{ school.level_of_schooling or "Not available" }}</p>
-                    <p><strong>Location:</strong> {{ school.town_suburb or "Not available" }}{% if school.postcode %}, {{ school.postcode }}{% endif %}</p>
+                    <p><strong>Location:</strong> {{ school.street or "" }}{% if school.street and school.town_suburb %}, {% endif %}{{ school.town_suburb or "" }}{% if school.postcode %}, {{ school.postcode }}{% endif %}</p>
                     {% if school.latest_year_enrolment_fte %}
                     <p><strong>Enrolment:</strong> {{ "%.0f"|format(school.latest_year_enrolment_fte) }}</p>
                     {% else %}
@@ -126,9 +126,36 @@
                     {% endif %}
                 </div>
 
+                <!-- Info Badges -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <!-- Gender badge -->
+                    {% if school.school_gender %}
+                    <span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">
+                        {% if school.school_gender == "Coed" %}Boys & Girls{% else %}{{ school.school_gender }}{% endif %}
+                    </span>
+                    {% endif %}
+
+                    <!-- Size badge -->
+                    {% if school.latest_year_enrolment_fte %}
+                    <span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">
+                        {% if school.latest_year_enrolment_fte < 300 %}Small{% elif school.latest_year_enrolment_fte <= 800 %}Medium{% else %}Large{% endif %}
+                    </span>
+                    {% endif %}
+
+                    <!-- Advanced (OC) badge -->
+                    {% if school.opportunity_class == "Y" %}
+                    <span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">Advanced</span>
+                    {% endif %}
+
+                    <!-- Intensive English badge -->
+                    {% if school.intensive_english_centre == "Y" %}
+                    <span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">Intensive English</span>
+                    {% endif %}
+                </div>
+
                 <a
                     href="/school/{{ school.id }}"
-                    class="block w-full bg-black text-white text-center px-4 py-2 rounded-lg font-hand font-bold hover:bg-gray-800 transition-colors"
+                    class="block w-full bg-black text-white text-center px-4 py-3 rounded-lg font-hand font-bold hover:bg-gray-800 transition-colors"
                 >
                     View Details
                 </a>

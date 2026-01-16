@@ -1,232 +1,252 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block title %}Find Schools Near You - NSW School
+Finder{% endblock %} {% block content %}
+<div class="max-w-4xl mx-auto">
+  <h1
+    class="text-3xl sm:text-4xl md:text-5xl font-hand font-bold text-black mb-2 text-center"
+  >
+    Discover NSW Schools
+  </h1>
 
-{% block title %}Find Schools Near You - NSW School Finder{% endblock %}
+  <p
+    class="text-base sm:text-lg md:text-xl text-gray-600 mb-12 sm:mb-16 md:mb-20 font-sans text-center"
+  >
+    Find schools that meet your needs in NSW
+  </p>
 
-{% block content %}
-<div class="max-w-2xl mx-auto">
-    <h1 class="text-3xl sm:text-4xl md:text-5xl font-hand font-bold text-black mb-6 text-center">
-        Find Schools Near You
-    </h1>
+  {% if error %}
+  <div class="bg-red-50 border-2 border-black rounded-lg p-4 mb-6">
+    <p class="text-red-800 font-sans">{{ error }}</p>
+  </div>
+  {% endif %}
 
-    <p class="text-lg text-gray-700 mb-8 text-center font-sans">
-        Enter your suburb or postcode to find nearby schools
-    </p>
-
-    {% if error %}
-    <div class="bg-red-50 border-2 border-red-500 rounded-lg p-4 mb-6">
-        <p class="text-red-800 font-sans">{{ error }}</p>
-    </div>
-    {% endif %}
-
-    <form method="POST" action="/results" class="bg-white border-2 border-black rounded-lg p-4 sm:p-6 space-y-6">
-        <!-- Location Section -->
-        <div class="space-y-4">
-            <h2 class="text-lg font-hand font-bold text-black">Your Location</h2>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label for="suburb" class="block text-sm font-medium text-black mb-2 font-sans">
-                        Suburb
-                    </label>
-                    <input
-                        type="text"
-                        id="suburb"
-                        name="suburb"
-                        value="{{ suburb or '' }}"
-                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black font-sans"
-                        placeholder="e.g. Parramatta"
-                        aria-label="Suburb name"
-                    >
-                </div>
-
-                <div>
-                    <label for="postcode" class="block text-sm font-medium text-black mb-2 font-sans">
-                        Postcode
-                    </label>
-                    <input
-                        type="text"
-                        id="postcode"
-                        name="postcode"
-                        value="{{ postcode or '' }}"
-                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black font-sans"
-                        placeholder="e.g. 2150"
-                        pattern="[0-9]{4}"
-                        maxlength="4"
-                        aria-label="Postcode"
-                    >
-                </div>
-            </div>
-
-            <div>
-                <label for="radius" class="block text-sm font-medium text-black mb-2 font-sans">
-                    Search Radius
-                </label>
-                <select
-                    id="radius"
-                    name="radius"
-                    class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black font-sans"
-                    aria-label="Search radius in kilometers"
-                >
-                    <option value="3">3 km</option>
-                    <option value="5" selected>5 km</option>
-                    <option value="10">10 km</option>
-                    <option value="15">15 km</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Divider -->
-        <hr class="border-gray-300">
-
-        <!-- Group 1: School Level -->
-        <div class="space-y-3">
-            <h2 class="text-lg font-hand font-bold text-black">School Level</h2>
-            <p class="text-sm text-gray-600 font-sans">What level of school are you looking for?</p>
-
-            <div class="space-y-2">
-                <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <input type="radio" name="level" value="" class="w-5 h-5 text-black focus:ring-black" checked>
-                    <span class="font-sans">All levels</span>
-                </label>
-
-                <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <input type="radio" name="level" value="Primary School" class="w-5 h-5 text-black focus:ring-black">
-                    <span class="font-sans">Primary school</span>
-                </label>
-
-                <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <input type="radio" name="level" value="Secondary School" class="w-5 h-5 text-black focus:ring-black">
-                    <span class="font-sans">Secondary school</span>
-                </label>
-
-                <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <input type="radio" name="level" value="Central/Community School" class="w-5 h-5 text-black focus:ring-black">
-                    <span class="font-sans">Central / Community school</span>
-                </label>
-
-                <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <input type="radio" name="level" value="Infants School" class="w-5 h-5 text-black focus:ring-black">
-                    <span class="font-sans">Infants school</span>
-                </label>
-
-                <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <input type="radio" name="level" value="Schools for Specific Purposes" class="w-5 h-5 text-black focus:ring-black">
-                    <span class="font-sans">Schools for Specific Purposes</span>
-                </label>
-
-                <!-- Other levels (collapsed) -->
-                <details class="rounded-lg border border-gray-200">
-                    <summary class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer font-sans text-gray-600">
-                        Other school types
-                    </summary>
-                    <div class="px-3 pb-3 space-y-2">
-                        <label class="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer">
-                            <input type="radio" name="level" value="Environmental Education Centre" class="w-5 h-5 text-black focus:ring-black">
-                            <span class="font-sans text-sm">Environmental Education Centre</span>
-                        </label>
-                        <label class="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer">
-                            <input type="radio" name="level" value="Other School" class="w-5 h-5 text-black focus:ring-black">
-                            <span class="font-sans text-sm">Other School</span>
-                        </label>
-                    </div>
-                </details>
-            </div>
-        </div>
-
-        <!-- Group 2: Programs & Support (progressively revealed) -->
-        <div id="programsGroup" class="space-y-3 hidden">
-            <hr class="border-gray-300">
-            <h2 class="text-lg font-hand font-bold text-black">Programs & Support</h2>
-            <p class="text-sm text-gray-600 font-sans">Filter by available programs (optional)</p>
-
-            <div class="space-y-2">
-                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <input type="checkbox" name="has_preschool" value="Y" class="w-5 h-5 mt-0.5 text-black focus:ring-black rounded">
-                    <div>
-                        <span class="font-sans font-medium">Preschool on site</span>
-                        <p class="text-sm text-gray-500">School has a preschool on the same campus</p>
-                    </div>
-                </label>
-
-                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <input type="checkbox" name="has_intensive_english" value="Y" class="w-5 h-5 mt-0.5 text-black focus:ring-black rounded">
-                    <div>
-                        <span class="font-sans font-medium">English language support for new students</span>
-                        <p class="text-sm text-gray-500">Intensive English programs for students learning English</p>
-                    </div>
-                </label>
-
-                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <input type="checkbox" name="has_opportunity_class" value="Y" class="w-5 h-5 mt-0.5 text-black focus:ring-black rounded">
-                    <div>
-                        <span class="font-sans font-medium">Opportunity class (advanced classes)</span>
-                        <p class="text-sm text-gray-500">Academically advanced classes for eligible primary students</p>
-                    </div>
-                </label>
-
-                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <input type="checkbox" name="not_selective" value="Y" class="w-5 h-5 mt-0.5 text-black focus:ring-black rounded">
-                    <div>
-                        <span class="font-sans font-medium">Not a selective school</span>
-                        <p class="text-sm text-gray-500">Regular enrolment without academic entrance exam</p>
-                    </div>
-                </label>
-
-                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <input type="checkbox" name="has_distance_education" value="Y" class="w-5 h-5 mt-0.5 text-black focus:ring-black rounded">
-                    <div>
-                        <span class="font-sans font-medium">Distance education available</span>
-                        <p class="text-sm text-gray-500">Offers remote learning programs</p>
-                    </div>
-                </label>
-            </div>
-        </div>
-
-        <button
-            type="submit"
-            class="w-full bg-black text-white px-6 py-3 rounded-lg font-hand font-bold text-lg hover:bg-gray-800 transition-colors"
+  <form
+    method="POST"
+    action="/results"
+    class="bg-white border-2 border-black rounded-lg px-12 pb-12 pt-4 space-y-6 mb-4 sm:mb-20"
+  >
+    <!-- Search by Location -->
+    <div class="space-y-3">
+      <div
+        class="flex items-center gap-2 text-xl sm:text-2xl font-hand font-bold text-black mb-4 sm:mb-6"
+      >
+        <svg
+          class="w-6 h-6 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-            Find Nearby Schools
-        </button>
-    </form>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          ></path>
+        </svg>
+        <span>Search Schools</span>
+      </div>
 
-    <div class="mt-8 text-center text-sm text-gray-600 font-sans">
-        <p>Enter at least a suburb or postcode to search.</p>
+      <label class="text-sm font-medium text-black font-hand"
+        >Search by Suburb or Postcode
+      </label>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          id="suburb"
+          name="suburb"
+          value="{{ suburb or '' }}"
+          class="flex-1 px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black font-sans"
+          placeholder="e.g., Parramatta"
+          aria-label="Suburb name"
+        />
+        <input
+          type="text"
+          id="postcode"
+          name="postcode"
+          value="{{ postcode or '' }}"
+          class="flex-1 px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black font-sans"
+          placeholder="Postcode"
+          pattern="[0-9]{4}"
+          maxlength="4"
+          aria-label="Postcode"
+        />
+      </div>
     </div>
+
+    <!-- Filters Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <!-- School Level -->
+      <div>
+        <label
+          for="level"
+          class="text-sm font-medium text-black block mb-2 font-hand"
+          >School Level</label
+        >
+        <select
+          id="level"
+          name="level"
+          class="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black font-sans text-sm"
+          aria-label="School level"
+        >
+          <option value="">All Levels</option>
+          <option value="Primary School">Primary School</option>
+          <option value="Secondary School">Secondary School</option>
+          <option value="Central/Community School">
+            Central/Community School
+          </option>
+          <option value="Infants School">Infants School</option>
+          <option value="Schools for Specific Purposes">
+            Schools for Specific Purposes
+          </option>
+          <option value="Environmental Education Centre">
+            Environmental Education Centre
+          </option>
+          <option value="Other School">Other School</option>
+        </select>
+      </div>
+
+      <!-- Search Radius -->
+      <div>
+        <label
+          for="radius"
+          class="text-sm font-medium text-black block mb-2 font-hand"
+          >Radius</label
+        >
+        <select
+          id="radius"
+          name="radius"
+          class="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black font-sans text-sm"
+          aria-label="Search radius in kilometers"
+        >
+          <option value="3">3 km</option>
+          <option
+            value="5"
+            selected
+          >
+            5 km
+          </option>
+          <option value="10">10 km</option>
+          <option value="15">15 km</option>
+        </select>
+      </div>
+
+      <!-- Additional Options -->
+      <div>
+        <label
+          for="options"
+          class="text-sm font-medium text-black block mb-2 font-hand"
+          >Additional Options</label
+        >
+        <button
+          type="button"
+          id="toggleOptions"
+          class="w-full px-3 py-2 border-2 border-black rounded-lg hover:bg-gray-50 font-sans text-sm transition-colors"
+        >
+          More filters ▼
+        </button>
+      </div>
+    </div>
+
+    <!-- Advanced Filters (Hidden by default) -->
+    <div
+      id="advancedFilters"
+      class="hidden space-y-4 pt-4 border-t-2 border-black"
+    >
+      <h3 class="font-hand font-bold text-black">Filters</h3>
+
+      <div class="space-y-2">
+        <label
+          class="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer"
+        >
+          <input
+            type="checkbox"
+            name="has_preschool"
+            value="Y"
+            class="w-5 h-5 text-black focus:ring-black rounded"
+          />
+          <span class="font-sans text-sm">Preschool on site</span>
+        </label>
+
+        <label
+          class="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer"
+        >
+          <input
+            type="checkbox"
+            name="has_intensive_english"
+            value="Y"
+            class="w-5 h-5 text-black focus:ring-black rounded"
+          />
+          <span class="font-sans text-sm">English language support</span>
+        </label>
+
+        <label
+          class="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer"
+        >
+          <input
+            type="checkbox"
+            name="has_opportunity_class"
+            value="Y"
+            class="w-5 h-5 text-black focus:ring-black rounded"
+          />
+          <span class="font-sans text-sm">Opportunity class</span>
+        </label>
+
+        <label
+          class="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer"
+        >
+          <input
+            type="checkbox"
+            name="not_selective"
+            value="Y"
+            class="w-5 h-5 text-black focus:ring-black rounded"
+          />
+          <span class="font-sans text-sm">Not a selective school</span>
+        </label>
+
+        <label
+          class="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer"
+        >
+          <input
+            type="checkbox"
+            name="has_distance_education"
+            value="Y"
+            class="w-5 h-5 text-black focus:ring-black rounded"
+          />
+          <span class="font-sans text-sm">Distance education available</span>
+        </label>
+      </div>
+    </div>
+
+    <button
+      type="submit"
+      class="w-full bg-black text-white px-6 py-3 rounded-lg font-hand font-bold text-lg hover:bg-gray-800 transition-colors"
+    >
+      Search Schools
+    </button>
+
+    <div class="mt-4 text-center text-sm text-gray-600 font-sans">
+      <p>Enter at least a suburb or postcode to search.</p>
+    </div>
+  </form>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const levelRadios = document.querySelectorAll('input[name="level"]');
-    const programsGroup = document.getElementById('programsGroup');
+  document.addEventListener('DOMContentLoaded', function () {
+    const toggleBtn = document.getElementById('toggleOptions');
+    const advancedFilters = document.getElementById('advancedFilters');
+    let isOpen = false;
 
-    function showProgramsGroup(animate = true) {
-        if (animate && programsGroup.classList.contains('hidden')) {
-            programsGroup.classList.remove('hidden');
-            programsGroup.style.opacity = '0';
-            programsGroup.style.transform = 'translateY(-10px)';
+    toggleBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      isOpen = !isOpen;
 
-            requestAnimationFrame(() => {
-                programsGroup.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                programsGroup.style.opacity = '1';
-                programsGroup.style.transform = 'translateY(0)';
-            });
-        } else {
-            programsGroup.classList.remove('hidden');
-            programsGroup.style.opacity = '1';
-            programsGroup.style.transform = 'translateY(0)';
-        }
-    }
-
-    // Show programs group on page load (since "All levels" is checked by default)
-    showProgramsGroup(false);
-
-    // Also show on any radio change (in case user unchecks somehow)
-    levelRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            showProgramsGroup(true);
-        });
+      if (isOpen) {
+        advancedFilters.classList.remove('hidden');
+        toggleBtn.textContent = 'Fewer filters ▲';
+      } else {
+        advancedFilters.classList.add('hidden');
+        toggleBtn.textContent = 'More filters ▼';
+      }
     });
-});
+  });
 </script>
 {% endblock %}
