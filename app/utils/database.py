@@ -6,8 +6,11 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlmodel import SQLModel
 
-# Determine database path
-if os.path.exists("/opt/school-finder/data"):
+# Determine database path based on environment
+if os.environ.get("VERCEL"):
+    # Vercel serverless - database bundled with deployment
+    DB_PATH = Path(__file__).parent.parent.parent / "school_finder.db"
+elif os.path.exists("/opt/school-finder/data"):
     # Production on Oracle Cloud
     DB_PATH = Path("/opt/school-finder/data/school_finder.db")
 elif os.path.exists("/data"):

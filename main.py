@@ -1,4 +1,6 @@
 """FastAPI application entry point."""
+import os
+from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -9,6 +11,9 @@ from app.models import school, postcode  # noqa: F401
 
 from app.utils.database import init_db
 from app.routes.school_routes import router
+
+# Get the directory where main.py is located
+BASE_DIR = Path(__file__).resolve().parent
 
 
 @asynccontextmanager
@@ -27,8 +32,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# Mount static files - use absolute path for Vercel compatibility
+static_dir = BASE_DIR / "app" / "static"
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # Include routers
 app.include_router(router)
