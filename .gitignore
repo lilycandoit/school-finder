@@ -24,10 +24,9 @@ wheels/
 *.egg
 
 # Database
-*.db
 *.sqlite
 *.sqlite3
-school_finder.db
+# Note: school_finder.db is tracked for Vercel deployment (read-only)
 
 # IDE
 .vscode/
