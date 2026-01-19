@@ -169,7 +169,7 @@ async def main():
 
     async with async_session() as session:
         # Load schools
-        schools_path = Path("master_dataset.csv")
+        schools_path = Path("data/master_dataset.csv")
         if schools_path.exists():
             print(f"Loading schools from {schools_path}...")
             count = await load_schools_csv(schools_path, session)
