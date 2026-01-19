@@ -1,14 +1,12 @@
 {
   "version": 2,
-  "buildCommand": "pip install -r requirements.txt && python build_db.py",
   "builds": [
     {
       "src": "main.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "app/static/**",
-      "use": "@vercel/static"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
     }
   ],
   "routes": [
@@ -20,11 +18,5 @@
       "src": "/(.*)",
       "dest": "main.py"
     }
-  ],
-  "functions": {
-    "main.py": {
-      "memory": 512,
-      "maxDuration": 30
-    }
-  }
+  ]
 }
