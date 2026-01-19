@@ -22,6 +22,9 @@ def parse_float(value: str) -> Optional[float]:
         return None
 
 
+# test deploy to Vercel
+
+
 def parse_int(value: str) -> Optional[int]:
     """Parse int, returning None for empty strings."""
     if not value or value.strip() == "":
