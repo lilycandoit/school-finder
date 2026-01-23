@@ -1,23 +1,107 @@
 # NSW School Finder
 
-A location-first web application that helps migrant parents in New South Wales (NSW), Australia find and compare nearby schools using official open government data.
+A location-based web application that helps **migrant parents and newly arrived families in New South Wales** find, understand, and compare nearby schools using **official NSW open government data**.
 
-## Features
+This project is built with a strong focus on **accessibility**, **ethical data use**, and **reducing cognitive load** for parents who may be unfamiliar with the NSW education system or are not native English speakers.
 
-- **Location-based search**: Find schools by suburb or postcode
-- **Distance calculation**: Schools shown with distance from your location
-- **School details**: View comprehensive information about each school
-- **Comparison tool**: Compare up to 3 schools side-by-side
-- **Mobile-first design**: Optimized for mobile devices
-- **Accessible**: Designed for users with limited English
+---
+
+## Why this project exists
+
+Finding a school in NSW can be overwhelming — especially for migrant families. Government websites are information-rich but often:
+
+* Use complex education terminology
+* Assume local system knowledge
+* Scatter important details across multiple pages
+
+**NSW School Finder** brings everything together in one clear, parent-friendly interface.
+
+> **Fun fact:** I originally built this app for myself and my future kids.
+> Because of that, I pay close attention to the small details that actually matter when parents are making real decisions.
+
+---
+
+## Key Features
+
+### Search & Discovery
+
+* Search schools by **suburb** or **postcode**
+* Adjustable **radius** to control distance
+* Supports **primary, secondary, and special-purpose schools**
+
+### Practical Filters
+
+* Preschool on site
+* English language support
+* Opportunity classes (OC)
+* Selective / non-selective schools
+* Distance education availability
+
+### Clear School Cards
+
+* School name, level, and location
+* Distance from searched area
+* Enrolment size (small / medium / large)
+* Quick access to detailed view
+
+### Compare Schools
+
+* Select and compare **up to 3 schools side-by-side**
+* Designed to support real decision-making, not just browsing
+
+### Detailed School Pages
+
+Each school page includes:
+
+* Contact details and website
+* Student numbers
+* Multilingual background percentage
+* Learning support options
+* Programs offered
+* ICSEA value with a **plain-English explanation**
+
+### Plain-English Explanations
+
+Complex NSW education terms are translated into **simple, friendly language**, including:
+
+* Selective schools
+* Opportunity classes (OC)
+* Intensive English support
+* Schools for specific purposes
+
+This is especially helpful for families with **non-native English backgrounds**.
+
+---
 
 ## Tech Stack
 
-- **Backend**: FastAPI
-- **Database**: SQLite with SQLModel
-- **Templates**: Jinja2
-- **Styling**: TailwindCSS
-- **Deployment**: Fly.io
+* **Backend:** FastAPI
+* **ORM:** SQLAlchemy
+* **Database:** SQLite
+* **Templating:** Jinja2
+* **Styling:** Tailwind CSS
+* **Deployment:** Vercel
+
+---
+
+## Data Source
+
+* **NSW Open Education Dataset**
+* Data is used **read-only** and displayed transparently
+* No modification or ranking of schools beyond official data
+
+This project follows principles of **ethical data use** and avoids misleading comparisons.
+
+---
+
+## Design Principles
+
+* **Accessibility first** – readable layouts, clear labels, minimal clutter
+* **Low cognitive load** – only show what parents need at each step
+* **Trustworthy data** – official government sources only
+* **Human-centred design** – built around real parent questions, not technical metrics
+
+---
 
 ## Setup
 
@@ -35,7 +119,7 @@ git clone <repository-url>
 cd school-finder
 ```
 
-2. **Create a virtual environment (recommended):**
+2. Create a virtual environment (recommended):
 
 ```bash
 python3 -m venv venv
@@ -44,20 +128,15 @@ source venv/bin/activate  # On macOS/Linux
 venv\Scripts\activate  # On Windows
 ```
 
-3. **Install dependencies:**
+3. Install dependencies:
 
 ```bash
-# If using virtual environment (activated above):
 pip install -r requirements.txt
-
-# OR if not using virtual environment, use pip3:
-pip3 install -r requirements.txt
 ```
 
-4. **Load data into database:**
+4. Load data into database:
 
 ```bash
-# Make sure virtual environment is activated if you're using one
 python3 scripts/load_data.py
 ```
 
@@ -65,9 +144,15 @@ This will:
 
 - Create the SQLite database
 - Load schools from `master_dataset.csv`
-- Load postcodes from `data/postcodes_nsw.csv` (if available)
+- Load postcodes from `data/postcodes_nsw.csv`
 
 ### Running Locally
+
+```bash
+python3 main.py
+```
+
+Or alternatively:
 
 ```bash
 uvicorn main:app --reload
@@ -75,81 +160,37 @@ uvicorn main:app --reload
 
 The application will be available at `http://localhost:8000`
 
-## Data Sources
+---
 
-- **Schools Data**: NSW Department of Education Master Dataset
+## Future Improvements
 
-  - Source: https://data.nsw.gov.au/data/dataset/nsw-education-nsw-public-schools-master-dataset
-  - File: `master_dataset.csv`
+Planned ideas include:
 
-- **Postcode Centroids**: NSW postcode centroid data
-  - File: `data/postcodes_nsw.csv`
-  - Note: If postcode data is not available, the app will use fallback geocoding (median of schools in suburb)
+* Better comparison visualisation
+* Saving favourite schools
+* Mobile-first refinements
+* Additional explanations for NSW-specific concepts
+* Performance and accessibility audits
 
-## Deployment
+This app will continue to evolve as new ideas — and real parenting needs — come up.
 
-### Fly.io
+---
 
-1. Install Fly CLI:
+## Who this is for
 
-```bash
-curl -L https://fly.io/install.sh | sh
-```
+* Migrant parents new to NSW
+* Families with non-native English backgrounds
+* Anyone who wants a **clear, calm, and honest** way to explore NSW schools
 
-2. Login to Fly:
+---
 
-```bash
-fly auth login
-```
+## Feedback
 
-3. Create volume for database:
+If you have suggestions, questions, or ideas — especially from a parent's perspective — I'd love to hear them.
 
-```bash
-fly volumes create school_finder_data --size 1 --region syd
-```
+This project is personal, practical, and built with care.
 
-4. Deploy:
-
-```bash
-fly deploy
-```
-
-## Project Structure
-
-```
-school-finder/
-├── app/
-│   ├── models/          # Database models
-│   ├── controllers/     # Business logic
-│   ├── routes/          # FastAPI routes
-│   ├── templates/       # Jinja2 templates
-│   ├── utils/           # Utilities
-│   └── static/          # Static files
-├── data/                # Data files
-├── scripts/             # Utility scripts
-├── main.py              # FastAPI app
-└── requirements.txt     # Dependencies
-```
-
-## Important Notes
-
-### ICSEA Values
-
-ICSEA (Index of Community Socio-Educational Advantage) values are displayed with the following explanation:
-
-> "ICSEA shows the general socio-educational background of students at a school. It does not measure school quality or teaching performance."
-
-ICSEA values are:
-
-- Only shown on the school detail page
-- Never labeled as "good" or "bad"
-- Never used for ranking or recommendations
-
-### Data Privacy
-
-- All data is from public government sources
-- No user data is collected or stored
-- No authentication required
+---
 
 ## License
 
