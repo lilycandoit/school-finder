@@ -110,6 +110,18 @@ endblock %} {% block content %}
           <td class="p-2 text-gray-700">{{ school.selective_school }}</td>
           {% endfor %}
         </tr>
+        <tr class="border-b border-black">
+          <td class="p-2 font-semibold text-black">Opportunity Class</td>
+          {% for school in schools %}
+          <td class="p-2 text-gray-700">
+            {% if school.has_opportunity_class %}
+            <span class="text-green-700 font-semibold">Yes</span>
+            {% else %}
+            <span class="text-gray-500">No</span>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
         {% if schools|selectattr("icsea_value")|list|length > 0 %}
         <tr class="border-b-2 border-black">
           <td class="p-2 font-semibold text-black">ICSEA Value</td>

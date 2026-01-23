@@ -147,13 +147,17 @@ async def compare(
     if not school_ids:
         raise HTTPException(status_code=400, detail="No valid school IDs provided")
 
-    # Parse distances (optional)
-    distance_list = []
+    # Parse distances and create ID-to-distance mapping
+    distance_map = {}
     if distances:
         try:
             distance_list = [float(d.strip()) for d in distances.split(",") if d.strip()][:3]
+            # Map each school ID to its corresponding distance
+            for i, school_id in enumerate(school_ids):
+                if i < len(distance_list):
+                    distance_map[school_id] = distance_list[i]
         except ValueError:
-            distance_list = []
+            pass
 
     # Get schools
     schools = await get_schools_by_ids(db, school_ids)
@@ -166,12 +170,9 @@ async def compare(
     # Transform schools for user-friendly display
     display_schools = transform_schools_for_comparison(schools)
 
-    # Add distances to display schools (matching by order)
-    for i, school in enumerate(display_schools):
-        if i < len(distance_list):
-            school["distance"] = distance_list[i]
-        else:
-            school["distance"] = None
+    # Add distances to display schools (matching by school ID, not position)
+    for school in display_schools:
+        school["distance"] = distance_map.get(school["id"])
 
     return templates.TemplateResponse(
         "compare.html",
