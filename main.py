@@ -1,10 +1,10 @@
 """FastAPI application entry point."""
-import os
 from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 # Import models to ensure they're registered with SQLModel
 from app.models import school, postcode  # noqa: F401
@@ -38,6 +38,9 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # Include routers
 app.include_router(router)
+
+# Gzip compression for responses > 500 bytes
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 # CORS middleware (restrict in production)
 app.add_middleware(

@@ -35,17 +35,17 @@ class School(SQLModel, table=True):
     lbote_pct: Optional[str] = Field(default=None)  # Can be "np" for suppressed
     icsea_value: Optional[int] = Field(default=None)
 
-    # School type
+    # School type (indexed fields used in filtering)
     level_of_schooling: Optional[str] = Field(default=None, index=True)
-    selective_school: Optional[str] = Field(default=None)
-    opportunity_class: Optional[str] = Field(default=None)
+    selective_school: Optional[str] = Field(default=None, index=True)
+    opportunity_class: Optional[str] = Field(default=None, index=True)
     school_specialty_type: Optional[str] = Field(default=None)
     school_subtype: Optional[str] = Field(default=None)
     support_classes: Optional[str] = Field(default=None)
-    preschool_ind: Optional[str] = Field(default=None)
-    distance_education: Optional[str] = Field(default=None)
-    intensive_english_centre: Optional[str] = Field(default=None)
-    school_gender: Optional[str] = Field(default=None)
+    preschool_ind: Optional[str] = Field(default=None, index=True)
+    distance_education: Optional[str] = Field(default=None, index=True)
+    intensive_english_centre: Optional[str] = Field(default=None, index=True)
+    school_gender: Optional[str] = Field(default=None, index=True)
     late_opening_school: Optional[str] = Field(default=None)
 
     # Dates

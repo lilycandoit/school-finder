@@ -8,7 +8,7 @@ Finder{% endblock %} {% block content %}
   </h1>
 
   <p
-    class="text-base sm:text-lg md:text-xl text-gray-600 mb-12 sm:mb-16 md:mb-20 font-sans text-center"
+    class="text-base sm:text-lg md:text-xl text-gray-700 mb-12 sm:mb-16 md:mb-20 font-sans text-center"
   >
     Find schools that meet your needs in NSW
   </p>
@@ -34,6 +34,7 @@ Finder{% endblock %} {% block content %}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <path
             stroke-linecap="round"
@@ -140,6 +141,8 @@ Finder{% endblock %} {% block content %}
           type="button"
           id="toggleOptions"
           class="w-full px-3 py-2 border-2 border-black rounded-lg hover:bg-gray-50 font-sans text-sm transition-colors"
+          aria-expanded="false"
+          aria-controls="advancedFilters"
         >
           More filters ▼
         </button>
@@ -147,11 +150,11 @@ Finder{% endblock %} {% block content %}
     </div>
 
     <!-- Advanced Filters (Hidden by default) -->
-    <div
+    <fieldset
       id="advancedFilters"
       class="hidden space-y-4 pt-4 border-t-2 border-black"
     >
-      <h3 class="font-hand font-bold text-black">Filters</h3>
+      <legend class="font-hand font-bold text-black text-lg">Additional Filters</legend>
 
       <div class="space-y-2">
         <label
@@ -214,7 +217,7 @@ Finder{% endblock %} {% block content %}
           <span class="font-sans text-sm">Distance education available</span>
         </label>
       </div>
-    </div>
+    </fieldset>
 
     <button
       type="submit"
@@ -223,7 +226,7 @@ Finder{% endblock %} {% block content %}
       Search Schools
     </button>
 
-    <div class="mt-4 text-center text-sm text-gray-600 font-sans">
+    <div class="mt-4 text-center text-sm text-gray-700 font-sans">
       <p>Enter at least a suburb or postcode to search.</p>
     </div>
   </form>
@@ -242,9 +245,11 @@ Finder{% endblock %} {% block content %}
       if (isOpen) {
         advancedFilters.classList.remove('hidden');
         toggleBtn.textContent = 'Fewer filters ▲';
+        toggleBtn.setAttribute('aria-expanded', 'true');
       } else {
         advancedFilters.classList.add('hidden');
         toggleBtn.textContent = 'More filters ▼';
+        toggleBtn.setAttribute('aria-expanded', 'false');
       }
     });
   });

@@ -1,10 +1,40 @@
 """School search and filtering logic."""
+import math
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.models.school import School
 from app.controllers.distance import haversine
+
+
+def get_bounding_box(lat: float, lon: float, radius_km: float) -> tuple:
+    """
+    Calculate a bounding box around a point for pre-filtering.
+
+    This reduces the number of schools we need to calculate exact distances for.
+    The box is slightly larger than the radius to account for earth curvature.
+
+    Returns: (min_lat, max_lat, min_lon, max_lon)
+    """
+    # Earth's radius in km
+    R = 6371.0
+
+    # Add 10% buffer for safety
+    radius_km = radius_km * 1.1
+
+    # Latitude: 1 degree ≈ 111 km
+    lat_delta = radius_km / 111.0
+
+    # Longitude: depends on latitude (gets smaller near poles)
+    lon_delta = radius_km / (111.0 * math.cos(math.radians(lat)))
+
+    return (
+        lat - lat_delta,  # min_lat
+        lat + lat_delta,  # max_lat
+        lon - lon_delta,  # min_lon
+        lon + lon_delta,  # max_lon
+    )
 
 
 async def find_schools_nearby(
@@ -38,10 +68,17 @@ async def find_schools_nearby(
     if filters is None:
         filters = {}
 
-    # Build base query
+    # Calculate bounding box for pre-filtering (major performance optimization)
+    min_lat, max_lat, min_lon, max_lon = get_bounding_box(latitude, longitude, radius_km)
+
+    # Build base query with bounding box filter
     query = select(School).where(
         School.latitude.isnot(None),
-        School.longitude.isnot(None)
+        School.longitude.isnot(None),
+        School.latitude >= min_lat,
+        School.latitude <= max_lat,
+        School.longitude >= min_lon,
+        School.longitude <= max_lon,
     )
 
     # Apply level filter if provided

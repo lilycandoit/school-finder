@@ -35,9 +35,17 @@
     {% block head %}{% endblock %}
   </head>
   <body class="h-full bg-white font-sans">
+    <!-- Skip link for keyboard/screen reader users -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-black focus:text-white focus:px-4 focus:py-2 focus:rounded"
+    >
+      Skip to main content
+    </a>
+
     <div class="min-h-full">
       <!-- Navigation -->
-      <nav class="bg-white border-b-2 border-black">
+      <nav class="bg-white border-b-2 border-black" aria-label="Main navigation">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex items-center justify-between h-16">
             <a
@@ -49,9 +57,10 @@
               >
                 <img
                   src="/static/img/vc-logo.png"
-                  alt="Logo"
+                  alt=""
                   class="w-8 h-8 mr-2"
                   onerror="this.style.display='none'"
+                  aria-hidden="true"
                 />
                 NSW School Finder
               </h1>
@@ -66,6 +75,7 @@
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   stroke-linecap="round"
@@ -74,21 +84,21 @@
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 ></path>
               </svg>
-              <span class="hidden sm:inline">Search</span>
+              <span class="sr-only sm:not-sr-only">Search</span>
             </a>
           </div>
         </div>
       </nav>
 
       <!-- Main Content -->
-      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {% block content %}{% endblock %}
       </main>
 
       <!-- Footer -->
       <footer class="bg-white border-t-2 border-black py-8">
         <div class="text-center space-y-4">
-          <p class="text-sm text-gray-600 font-sans">
+          <p class="text-sm text-gray-700 font-sans">
             Data sourced from
             <a
               href="https://data.nsw.gov.au/data/dataset/nsw-education-nsw-public-schools-master-dataset"

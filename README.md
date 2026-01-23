@@ -103,6 +103,26 @@ This project follows principles of **ethical data use** and avoids misleading co
 
 ---
 
+## Performance & Accessibility
+
+This app is optimised for speed and inclusivity:
+
+**Performance**
+* Bounding box pre-filtering reduces distance calculations from ~3000 to ~100 schools
+* Database indexes on all filter fields for fast queries
+* Gzip compression for smaller response sizes
+* Haversine formula for accurate distance calculations
+
+**Accessibility**
+* Skip-to-content link for keyboard navigation
+* ARIA labels on interactive elements
+* Semantic HTML with proper heading hierarchy
+* Form fieldsets with legends for screen readers
+* WCAG-compliant text contrast ratios
+* Mobile-responsive comparison table with scroll hints
+
+---
+
 ## Setup
 
 ### Prerequisites
@@ -166,11 +186,9 @@ The application will be available at `http://localhost:8000`
 
 Planned ideas include:
 
-* Better comparison visualisation
 * Saving favourite schools
-* Mobile-first refinements
 * Additional explanations for NSW-specific concepts
-* Performance and accessibility audits
+* Map view for school locations
 
 This app will continue to evolve as new ideas — and real parenting needs — come up.
 
