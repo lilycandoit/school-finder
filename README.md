@@ -49,6 +49,13 @@ Finding a school in NSW can be overwhelming — especially for migrant families.
 * Select and compare **up to 3 schools side-by-side**
 * Designed to support real decision-making, not just browsing
 
+### Save Schools
+
+* Save favourite schools with a single click (heart icon)
+* Saved schools stored **locally on your device** - no login required
+* Works offline - saved school data available without server requests
+* Compare or remove saved schools from the Saved page
+
 ### Detailed School Pages
 
 Each school page includes:
@@ -186,7 +193,6 @@ The application will be available at `http://localhost:8000`
 
 Planned ideas include:
 
-* Saving favourite schools
 * Additional explanations for NSW-specific concepts
 * Map view for school locations
 

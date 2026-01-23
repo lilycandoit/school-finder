@@ -65,27 +65,45 @@
                 NSW School Finder
               </h1>
             </a>
-            <a
-              href="/"
-              class="text-black hover:opacity-80 transition-opacity font-hand flex items-center gap-2"
-              title="Go to search"
-            >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
+            <div class="flex items-center gap-4">
+              <a
+                href="/saved"
+                class="text-black hover:opacity-80 transition-opacity font-hand flex items-center gap-1"
+                title="View saved schools"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                ></path>
-              </svg>
-              <span class="sr-only sm:not-sr-only">Search</span>
-            </a>
+                <svg
+                  class="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                <span class="hidden sm:inline">Saved</span>
+                <span id="savedBadge" class="hidden bg-black text-white text-xs px-1.5 py-0.5 rounded-full font-sans min-w-[20px] text-center">0</span>
+              </a>
+              <a
+                href="/"
+                class="text-black hover:opacity-80 transition-opacity font-hand flex items-center gap-2"
+                title="Go to search"
+              >
+                <svg
+                  class="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  ></path>
+                </svg>
+                <span class="sr-only sm:not-sr-only">Search</span>
+              </a>
+            </div>
           </div>
         </div>
       </nav>
@@ -120,6 +138,56 @@
         </div>
       </footer>
     </div>
+    <!-- Saved Schools LocalStorage Utilities -->
+    <script>
+      const SavedSchools = {
+        KEY: 'nswSchoolFinder_savedSchools',
+
+        getAll() {
+          try {
+            return JSON.parse(localStorage.getItem(this.KEY)) || [];
+          } catch {
+            return [];
+          }
+        },
+
+        save(school) {
+          const schools = this.getAll();
+          if (!schools.find(s => s.id === school.id)) {
+            schools.push({ ...school, savedAt: new Date().toISOString() });
+            localStorage.setItem(this.KEY, JSON.stringify(schools));
+          }
+          this.updateBadge();
+        },
+
+        remove(schoolId) {
+          const schools = this.getAll().filter(s => s.id !== schoolId);
+          localStorage.setItem(this.KEY, JSON.stringify(schools));
+          this.updateBadge();
+        },
+
+        isSaved(schoolId) {
+          return this.getAll().some(s => s.id === schoolId);
+        },
+
+        updateBadge() {
+          const badge = document.getElementById('savedBadge');
+          if (badge) {
+            const count = this.getAll().length;
+            badge.textContent = count;
+            badge.classList.toggle('hidden', count === 0);
+          }
+        },
+
+        clear() {
+          localStorage.removeItem(this.KEY);
+          this.updateBadge();
+        }
+      };
+
+      // Update badge on page load
+      document.addEventListener('DOMContentLoaded', () => SavedSchools.updateBadge());
+    </script>
     {% block scripts %}{% endblock %}
   </body>
 </html>

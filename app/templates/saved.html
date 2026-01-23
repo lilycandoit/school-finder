@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Schools - NSW School Finder{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-6">
+        <a href="/" class="text-black hover:underline font-hand mb-4 inline-block">← Back to search</a>
+        <h1 class="text-3xl sm:text-4xl font-hand font-bold text-black mb-2">
+            Saved Schools
+        </h1>
+        <p class="text-gray-700 font-sans text-sm">
+            Saved schools are stored on this device only.
+        </p>
+    </div>
+
+    <!-- Empty state (shown via JS when no saved schools) -->
+    <div id="emptyState" class="hidden bg-gray-50 border-2 border-black rounded-lg p-8 text-center">
+        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+        <p class="text-lg text-gray-700 font-sans mb-4">No saved schools yet.</p>
+        <p class="text-sm text-gray-600 font-sans mb-6">Click the heart icon on any school to save it here.</p>
+        <a href="/" class="inline-block bg-black text-white px-6 py-3 rounded-lg font-hand font-bold hover:bg-gray-800 transition-colors">
+            Find Schools
+        </a>
+    </div>
+
+    <!-- Schools list (populated via JS) -->
+    <div id="savedContent" class="hidden">
+        <!-- Action bar -->
+        <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <p id="schoolCount" class="text-sm text-gray-700 font-sans"></p>
+            <div class="flex gap-2">
+                <button
+                    type="button"
+                    id="compareBtn"
+                    class="bg-black text-white px-4 py-2 rounded-lg font-hand font-bold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    disabled
+                >
+                    Compare Selected
+                </button>
+                <button
+                    type="button"
+                    id="clearAllBtn"
+                    class="border-2 border-black text-black px-4 py-2 rounded-lg font-hand font-bold hover:bg-gray-100 transition-colors"
+                >
+                    Clear All
+                </button>
+            </div>
+        </div>
+
+        <!-- School cards container -->
+        <div id="schoolCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Cards inserted via JavaScript -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const emptyState = document.getElementById('emptyState');
+    const savedContent = document.getElementById('savedContent');
+    const schoolCards = document.getElementById('schoolCards');
+    const schoolCount = document.getElementById('schoolCount');
+    const compareBtn = document.getElementById('compareBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+
+    let selectedIds = new Set();
+
+    function formatSize(enrolment) {
+        if (!enrolment) return null;
+        if (enrolment < 300) return 'Small';
+        if (enrolment <= 800) return 'Medium';
+        return 'Large';
+    }
+
+    function formatGender(gender) {
+        if (!gender) return null;
+        return gender === 'Coed' ? 'Boys & Girls' : gender;
+    }
+
+    function createSchoolCard(school) {
+        const size = formatSize(school.latest_year_enrolment_fte);
+        const gender = formatGender(school.school_gender);
+
+        return `
+            <div class="bg-white border-2 border-black rounded-lg p-4 sm:p-6 hover:shadow-lg transition-shadow" data-school-id="${school.id}">
+                <div class="flex items-start justify-between mb-3">
+                    <input
+                        type="checkbox"
+                        class="compare-checkbox mt-1 w-5 h-5 border-2 border-black rounded focus:ring-2 focus:ring-black"
+                        data-school-id="${school.id}"
+                        aria-label="Select ${school.school_name} for comparison"
+                    >
+                    <button
+                        type="button"
+                        class="remove-btn text-red-500 hover:text-red-700 transition-colors"
+                        data-school-id="${school.id}"
+                        aria-label="Remove ${school.school_name}"
+                    >
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <h3 class="text-lg font-hand font-bold text-black mb-2">
+                    ${school.school_name || 'Not available'}
+                </h3>
+
+                <div class="space-y-1 mb-4 text-sm font-sans text-gray-700">
+                    <p><strong>Level:</strong> ${school.level_of_schooling || 'Not available'}</p>
+                    <p><strong>Location:</strong> ${school.town_suburb || ''}${school.postcode ? ', ' + school.postcode : ''}</p>
+                    ${school.distance ? `<p><strong>Distance:</strong> ${school.distance} km</p>` : ''}
+                </div>
+
+                <!-- Info Badges -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    ${gender ? `<span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">${gender}</span>` : ''}
+                    ${size ? `<span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">${size}</span>` : ''}
+                    ${school.opportunity_class === 'Y' ? '<span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">Advanced</span>' : ''}
+                    ${school.intensive_english_centre === 'Y' ? '<span class="inline-block bg-black text-white text-xs px-2 py-1 rounded-full font-sans">Intensive English</span>' : ''}
+                </div>
+
+                <a
+                    href="/school/${school.id}"
+                    class="block w-full bg-black text-white text-center px-4 py-3 rounded-lg font-hand font-bold hover:bg-gray-800 transition-colors"
+                >
+                    View Details
+                </a>
+            </div>
+        `;
+    }
+
+    function render() {
+        const schools = SavedSchools.getAll();
+
+        if (schools.length === 0) {
+            emptyState.classList.remove('hidden');
+            savedContent.classList.add('hidden');
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+        savedContent.classList.remove('hidden');
+
+        schoolCount.textContent = `${schools.length} saved school${schools.length !== 1 ? 's' : ''}`;
+        schoolCards.innerHTML = schools.map(createSchoolCard).join('');
+
+        // Attach event listeners to new elements
+        attachEventListeners();
+    }
+
+    function attachEventListeners() {
+        // Remove buttons
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const schoolId = parseInt(this.dataset.schoolId);
+                SavedSchools.remove(schoolId);
+                selectedIds.delete(schoolId);
+                updateCompareButton();
+                render();
+            });
+        });
+
+        // Checkboxes
+        document.querySelectorAll('.compare-checkbox').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const schoolId = parseInt(this.dataset.schoolId);
+                if (this.checked) {
+                    if (selectedIds.size >= 3) {
+                        this.checked = false;
+                        alert('You can only compare up to 3 schools');
+                        return;
+                    }
+                    selectedIds.add(schoolId);
+                } else {
+                    selectedIds.delete(schoolId);
+                }
+                updateCompareButton();
+            });
+        });
+    }
+
+    function updateCompareButton() {
+        compareBtn.disabled = selectedIds.size === 0;
+    }
+
+    // Compare button
+    compareBtn.addEventListener('click', function() {
+        if (selectedIds.size === 0) return;
+        const schools = SavedSchools.getAll();
+        const ids = Array.from(selectedIds).join(',');
+        const distances = Array.from(selectedIds)
+            .map(id => schools.find(s => s.id === id)?.distance || '')
+            .join(',');
+        window.location.href = `/compare?ids=${ids}&distances=${distances}`;
+    });
+
+    // Clear all button
+    clearAllBtn.addEventListener('click', function() {
+        if (confirm('Remove all saved schools?')) {
+            SavedSchools.clear();
+            selectedIds.clear();
+            render();
+        }
+    });
+
+    // Initial render
+    render();
+});
+</script>
+{% endblock %}

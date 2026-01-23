@@ -181,3 +181,9 @@ async def compare(
             "schools": display_schools,
         },
     )
+
+
+@router.get("/saved", response_class=HTMLResponse)
+async def saved(request: Request):
+    """Saved schools page - data loaded from localStorage on client side."""
+    return templates.TemplateResponse("saved.html", {"request": request})

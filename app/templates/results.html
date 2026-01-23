@@ -109,7 +109,23 @@
                         class="compare-checkbox mt-1 w-5 h-5 border-2 border-black rounded focus:ring-2 focus:ring-black"
                         aria-label="Select {{ school.school_name }} for comparison"
                     >
-                    <span class="text-sm font-sans text-gray-700">{{ school.distance }} km</span>
+                    <div class="flex items-center gap-2">
+                        <button
+                            type="button"
+                            class="save-btn text-gray-400 hover:text-red-500 transition-colors"
+                            data-school-id="{{ school.id }}"
+                            data-school='{{ {"id": school.id, "school_name": school.school_name, "level_of_schooling": school.level_of_schooling, "street": school.street, "town_suburb": school.town_suburb, "postcode": school.postcode, "school_gender": school.school_gender, "latest_year_enrolment_fte": school.latest_year_enrolment_fte, "distance": school.distance, "opportunity_class": school.opportunity_class, "intensive_english_centre": school.intensive_english_centre}|tojson|e }}'
+                            aria-label="Save {{ school.school_name }}"
+                        >
+                            <svg class="w-5 h-5 heart-outline" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                            </svg>
+                            <svg class="w-5 h-5 heart-filled hidden" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </button>
+                        <span class="text-sm font-sans text-gray-700">{{ school.distance }} km</span>
+                    </div>
                 </div>
 
                 <h3 class="text-lg font-hand font-bold text-black mb-2">
@@ -167,8 +183,8 @@
 </div>
 
 <script>
-// Limit checkboxes to 3
 document.addEventListener('DOMContentLoaded', function() {
+    // Comparison checkboxes - limit to 3
     const checkboxes = document.querySelectorAll('.compare-checkbox');
     const compareBtn = document.getElementById('compareBtn');
     const compareForm = document.getElementById('compareForm');
@@ -181,24 +197,55 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('You can only compare up to 3 schools');
                 return;
             }
-
             compareBtn.disabled = checked.length === 0;
         });
     });
 
     compareForm.addEventListener('submit', function(e) {
         e.preventDefault();
-
         const checked = document.querySelectorAll('.compare-checkbox:checked');
         if (checked.length === 0) {
             alert('Please select at least one school to compare');
             return;
         }
-
-        // Navigate directly to compare page with IDs and distances
         const ids = Array.from(checked).map(cb => cb.value).join(',');
         const distances = Array.from(checked).map(cb => cb.dataset.distance).join(',');
         window.location.href = `/compare?ids=${ids}&distances=${distances}`;
+    });
+
+    // Save buttons
+    function updateSaveButton(btn, isSaved) {
+        const outlineHeart = btn.querySelector('.heart-outline');
+        const filledHeart = btn.querySelector('.heart-filled');
+        if (isSaved) {
+            outlineHeart.classList.add('hidden');
+            filledHeart.classList.remove('hidden');
+            btn.classList.remove('text-gray-400');
+            btn.classList.add('text-red-500');
+        } else {
+            outlineHeart.classList.remove('hidden');
+            filledHeart.classList.add('hidden');
+            btn.classList.add('text-gray-400');
+            btn.classList.remove('text-red-500');
+        }
+    }
+
+    document.querySelectorAll('.save-btn').forEach(btn => {
+        const schoolId = parseInt(btn.dataset.schoolId);
+        // Set initial state
+        updateSaveButton(btn, SavedSchools.isSaved(schoolId));
+
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const school = JSON.parse(this.dataset.school);
+            if (SavedSchools.isSaved(school.id)) {
+                SavedSchools.remove(school.id);
+                updateSaveButton(this, false);
+            } else {
+                SavedSchools.save(school);
+                updateSaveButton(this, true);
+            }
+        });
     });
 });
 </script>
